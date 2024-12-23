@@ -1,3 +1,5 @@
+import * as vscode from 'vscode'
+
 export type ApiProvider =
 	| "anthropic"
 	| "openrouter"
@@ -32,7 +34,8 @@ export interface ApiHandlerOptions {
 	ollamaBaseUrl?: string
 	lmStudioModelId?: string
 	lmStudioBaseUrl?: string
-	geminiApiKey?: string
+	geminiApiKeys?: string[] // Array of API keys for rotation
+	geminiApiKey?: string // Single API key (legacy support)
 	openAiNativeApiKey?: string
 	azureApiVersion?: string
 	openRouterUseMiddleOutTransform?: boolean
@@ -42,6 +45,7 @@ export interface ApiHandlerOptions {
 
 export type ApiConfiguration = ApiHandlerOptions & {
 	apiProvider?: ApiProvider
+	context?: vscode.ExtensionContext
 }
 
 // Models
@@ -493,4 +497,3 @@ export const openAiNativeModels = {
 // https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation
 // https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#api-specs
 export const azureOpenAiDefaultApiVersion = "2024-08-01-preview"
-

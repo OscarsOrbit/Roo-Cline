@@ -105,7 +105,10 @@ export class Cline {
 		historyItem?: HistoryItem | undefined,
 	) {
 		this.providerRef = new WeakRef(provider)
-		this.api = buildApiHandler(apiConfiguration)
+		this.api = buildApiHandler({
+			...apiConfiguration,
+			context: provider.context
+		})
 		this.terminalManager = new TerminalManager()
 		this.urlContentFetcher = new UrlContentFetcher(provider.context)
 		this.browserSession = new BrowserSession(provider.context)

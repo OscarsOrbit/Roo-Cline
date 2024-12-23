@@ -1,4 +1,5 @@
 import {
+	VSCodeButton,
 	VSCodeCheckbox,
 	VSCodeDropdown,
 	VSCodeLink,
@@ -394,26 +395,104 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage }: 
 
 			{selectedProvider === "gemini" && (
 				<div>
-					<VSCodeTextField
-						value={apiConfiguration?.geminiApiKey || ""}
-						style={{ width: "100%" }}
-						type="password"
-						onInput={handleInputChange("geminiApiKey")}
-						placeholder="Enter API Key...">
-						<span style={{ fontWeight: 500 }}>Gemini API Key</span>
-					</VSCodeTextField>
-					<p
-						style={{
-							fontSize: "12px",
-							marginTop: 3,
-							color: "var(--vscode-descriptionForeground)",
-						}}>
-						This key is stored locally and only used to make API requests from this extension.
+					<div style={{ marginBottom: 10 }}>
+						<VSCodeTextField
+							value={apiConfiguration?.geminiApiKey || ""}
+							style={{ width: "100%" }}
+							type="password"
+							onInput={handleInputChange("geminiApiKey")}
+							placeholder="Enter API Key...">
+							<span style={{ fontWeight: 500 }}>Primary Gemini API Key</span>
+						</VSCodeTextField>
+					</div>
+
+					<div>
+						<label style={{ fontWeight: 500, display: "block", marginBottom: 5 }}>Additional API Keys</label>
+						<div style={{ display: "flex", gap: "5px", marginBottom: "10px" }}>
+							<VSCodeTextField
+								id="additional-key-input"
+								type="password"
+								placeholder="Enter additional API key..."
+								style={{ flexGrow: 1 }}
+								onKeyDown={(e: any) => {
+									if (e.key === 'Enter' && e.target.value) {
+										const newKeys = [...(apiConfiguration?.geminiApiKeys || []), e.target.value];
+										setApiConfiguration({
+											...apiConfiguration,
+											geminiApiKeys: newKeys
+										});
+										e.target.value = '';
+									}
+								}}
+							/>
+							<VSCodeButton
+								onClick={() => {
+									const input = document.getElementById('additional-key-input') as HTMLInputElement;
+									if (input.value) {
+										const newKeys = [...(apiConfiguration?.geminiApiKeys || []), input.value];
+										setApiConfiguration({
+											...apiConfiguration,
+											geminiApiKeys: newKeys
+										});
+										input.value = '';
+									}
+								}}>
+								Add
+							</VSCodeButton>
+						</div>
+
+						<div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+							{(apiConfiguration?.geminiApiKeys || []).map((key, index) => (
+								<div key={index} style={{
+									display: 'flex',
+									alignItems: 'center',
+									gap: '5px',
+									backgroundColor: 'var(--vscode-button-secondaryBackground)',
+									padding: '2px 6px',
+									borderRadius: '4px',
+									border: '1px solid var(--vscode-button-secondaryBorder)',
+									height: '24px'
+								}}>
+									<span>API Key {index + 1}</span>
+									<VSCodeButton
+										appearance="icon"
+										style={{
+											padding: 0,
+											margin: 0,
+											height: '20px',
+											width: '20px',
+											minWidth: '20px',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center'
+										}}
+										onClick={() => {
+											const newKeys = (apiConfiguration?.geminiApiKeys || []).filter((_, i) => i !== index);
+											setApiConfiguration({
+												...apiConfiguration,
+												geminiApiKeys: newKeys
+											});
+										}}
+									>
+										<span className="codicon codicon-close" />
+									</VSCodeButton>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<p style={{
+						fontSize: "12px",
+						marginTop: 10,
+						color: "var(--vscode-descriptionForeground)",
+					}}>
+						API keys are stored locally and only used to make API requests from this extension.
+						Keys will be automatically rotated to bypass rate limits.
 						{!apiConfiguration?.geminiApiKey && (
 							<VSCodeLink
 								href="https://ai.google.dev/"
 								style={{ display: "inline", fontSize: "inherit" }}>
-								You can get a Gemini API key by signing up here.
+								You can get Gemini API keys by signing up here.
 							</VSCodeLink>
 						)}
 					</p>

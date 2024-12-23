@@ -17,7 +17,7 @@ export interface ApiHandler {
 }
 
 export function buildApiHandler(configuration: ApiConfiguration): ApiHandler {
-	const { apiProvider, ...options } = configuration
+	const { apiProvider, context, ...options } = configuration
 	switch (apiProvider) {
 		case "anthropic":
 			return new AnthropicHandler(options)

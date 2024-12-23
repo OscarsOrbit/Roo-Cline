@@ -38,6 +38,7 @@ type SecretKey =
 	| "awsSessionToken"
 	| "openAiApiKey"
 	| "geminiApiKey"
+	| "geminiApiKeys"
 	| "openAiNativeApiKey"
 type GlobalStateKey =
 	| "apiProvider"
@@ -439,7 +440,13 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.updateGlobalState("lmStudioModelId", lmStudioModelId)
 							await this.updateGlobalState("lmStudioBaseUrl", lmStudioBaseUrl)
 							await this.updateGlobalState("anthropicBaseUrl", anthropicBaseUrl)
-							await this.storeSecret("geminiApiKey", geminiApiKey)
+							await this.storeSecret("geminiApiKey", geminiApiKey);
+							// Store additional Gemini API keys
+							if (message.apiConfiguration.geminiApiKeys) {
+								await this.storeSecret("geminiApiKeys", JSON.stringify(message.apiConfiguration.geminiApiKeys));
+							} else {
+								await this.storeSecret("geminiApiKeys", undefined);
+							}
 							await this.storeSecret("openAiNativeApiKey", openAiNativeApiKey)
 							await this.updateGlobalState("azureApiVersion", azureApiVersion)
 							await this.updateGlobalState("openRouterModelId", openRouterModelId)
@@ -1123,7 +1130,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			this.getGlobalState("preferredLanguage") as Promise<string | undefined>,
 		])
 
-		let apiProvider: ApiProvider
+		const geminiApiKeys = await this.getSecret("geminiApiKeys").then(keys => keys ? JSON.parse(keys) : []);
+		
+		let apiProvider: ApiProvider;
 		if (storedApiProvider) {
 			apiProvider = storedApiProvider
 		} else {
@@ -1159,6 +1168,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 				lmStudioBaseUrl,
 				anthropicBaseUrl,
 				geminiApiKey,
+				geminiApiKeys,
 				openAiNativeApiKey,
 				azureApiVersion,
 				openRouterModelId,
